@@ -6,6 +6,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-24
+
 ### Added
 - RINEX navigation file support (RINEX 2, 3 and 4, all GNSS) with per-field hovers.
 - Outline / breadcrumbs, folding, status bar summary and `RINEX: Show File Summary`, `RINEX: Go to Epoch...`,
@@ -13,9 +15,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Hovers for header labels and observation type codes, LLI / SSI decoding.
 - Detection by file name pattern (`*.YYo`, `*.YYn`, ...), `.rnx` / `.nav` and the first line of the file.
 - Theme-aware, customizable colors and settings.
+- Fixes issue #1: `.rnx` and other RINEX navigation files are supported.
 
 ### Changed
 - Observation values are colored by frequency band.
+- The RINEX version is shown with two decimals (e.g. `2.10`).
 - The file summary moved from the end-of-file hover to the status bar and the summary command.
 - Only the visible part of the editor is decorated and hovers are computed on demand
   (23 MB / 1 Hz observation file: about 1 s and 600 MB of decoration objects per update before;

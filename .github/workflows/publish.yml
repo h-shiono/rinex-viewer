@@ -1,0 +1,45 @@
+name: Publish
+
+# Publishes to the Visual Studio Marketplace with Trusted Publishing (OIDC).
+# Marketplace policy: owner "h-shiono", repository "rinex-viewer",
+# workflow "publish.yml", environment "marketplace".
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: marketplace
+    permissions:
+      contents: write # create the GitHub release
+      id-token: write # OIDC token for the Marketplace
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Check that the tag matches package.json
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match package.json version ${version}"
+            exit 1
+          fi
+
+      - run: npm run lint
+      - run: npm test
+
+      - name: Package
+        run: npx vsce package --out "rinex-viewer-${GITHUB_REF_NAME}.vsix"
+
+      - name: Publish to the Visual Studio Marketplace
+        run: npx vsce publish --oidc --packagePath "rinex-viewer-${GITHUB_REF_NAME}.vsix"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" "rinex-viewer-${GITHUB_REF_NAME}.vsix" --title "${GITHUB_REF_NAME}" --generate-notes
