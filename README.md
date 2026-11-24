@@ -74,6 +74,19 @@ npm test                  # parser unit tests (node:test)
 npm run test:integration  # extension tests in VS Code
 ```
 
+### Release
+
+Releases are published to the Visual Studio Marketplace by the
+[Publish workflow](.github/workflows/publish.yml) with Trusted Publishing (no token is stored).
+
+1. Update `version` in `package.json` and move the `[Unreleased]` notes in `CHANGELOG.md` under the new version.
+2. Merge to `main`, then push a tag that matches the version:
+   ```sh
+   git tag v1.1.0 && git push origin v1.1.0
+   ```
+3. The workflow checks that the tag matches `package.json`, runs the tests, publishes the `.vsix`
+   and creates a GitHub release with the `.vsix` attached.
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
