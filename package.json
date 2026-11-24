@@ -6,13 +6,16 @@
     "type": "git",
     "url": "https://github.com/h-shiono/rinex-viewer.git"
   },
-  "version": "1.1.0",
+  "version": "1.1.1",
   "engines": {
     "vscode": "^1.86.0"
   },
   "publisher": "hato-gnss",
   "categories": [
     "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:rinex"
   ],
   "main": "./dist/extension.js",
   "contributes": {
