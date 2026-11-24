@@ -66,26 +66,9 @@ are not available for them.
 Colors can be customized with `workbench.colorCustomizations`
 (`rinexViewer.band1` ... `rinexViewer.band9`, `rinexViewer.alternateRecordBackground`, `rinexViewer.eventForeground`).
 
-## Development
+## Contributing
 
-```sh
-npm install
-npm test                  # parser unit tests (node:test)
-npm run test:integration  # extension tests in VS Code
-```
-
-### Release
-
-Releases are published to the Visual Studio Marketplace by the
-[Publish workflow](.github/workflows/publish.yml) with Trusted Publishing (no token is stored).
-
-1. Update `version` in `package.json` and move the `[Unreleased]` notes in `CHANGELOG.md` under the new version.
-2. Merge to `main`, then push a tag that matches the version:
-   ```sh
-   git tag v1.1.0 && git push origin v1.1.0
-   ```
-3. The workflow checks that the tag matches `package.json`, runs the tests, publishes the `.vsix`
-   and creates a GitHub release with the `.vsix` attached.
+Bug reports and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup and tests.
 
 ## License
 

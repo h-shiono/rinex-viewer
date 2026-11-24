@@ -15,3 +15,5 @@ vsc-extension-quickstart.md
 test/**
 .github/**
 *.vsix
+CONTRIBUTING.md
+RELEASING.md
