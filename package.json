@@ -71,6 +71,7 @@
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "lint": "eslint src --ext ts",
+    "test": "npm run compile-tests && node --test out/test/unit/*.test.js",
     "pretest:integration": "npm run compile-tests && npm run compile",
     "test:integration": "vscode-test"
   },
