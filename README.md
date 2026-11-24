@@ -4,33 +4,62 @@
 
 ## Features
 
-* Visualization of data from RINEX Observation Data Files, making ASCII files easier to read, including satellites, epochs, and observation types.
+### Observation files
 
-<div style="display: flex;">
-  <div>
-    <p>Header and body:</p>
-    <img src="images/v2.11.png" alt="Header and body" height="200">
-  </div>
-  <div>
-    <p>EOF:</p>
-    <img src="images/v2.11_EOF.png" alt="EOF" height="200">
-  </div>
-</div>
+* Observation values are underlined by frequency band (color) and observable type
+  (pseudorange: solid, carrier phase: double, Doppler: dotted, signal strength: dashed).
+* Epoch lines are shown in bold, special event records (epoch flag 2-5) in italics.
+* Hover over a value to see the epoch, satellite, observation type, value, LLI and SSI.
+* Hover over header labels and observation type codes for a short description.
 
-## Supported Format Version
+<img src="images/v2.11.png" alt="Header and body" height="200">
 
-* RINEX Observation Data Files
-  * Versions: 2.11, 3.0x
-  * Extensions: `.YYo`, `.obs` and `.rxo`
+### Navigation files
 
-## Release Notes
+* Hover over any value to see the parameter name and unit (e.g. `√A [√m]`, `Toe`, `IODC`),
+  for GPS, GLONASS, Galileo, BeiDou, QZSS, NavIC/IRNSS and SBAS.
+* RINEX 4 `EPH` (LNAV, CNAV, CNV2, INAV, FNAV, D1/D2, CNV1-3, FDMA, SBAS), `STO`, `EOP` and `ION` records are supported.
+* The first line of each record is shown in bold and every other record is shaded.
 
-### 1.0.0　(2024-02-15)
+### Common
 
-#### New feature
-- Visualize RINEX Observation file
-- Support versions: 2.11, 3.0x
-- Support extensions: `.YYo`, `.obs` and `.rxo`
+* **Outline / breadcrumbs**: header and epochs grouped by hour (observation), records grouped by system (navigation).
+* **Folding** of the header, each epoch and each navigation record.
+* **Status bar** summary of the active file; click it (or run `RINEX: Show File Summary`) to open the full summary
+  (time span, interval, satellites, observation types, record counts).
+* **`RINEX: Go to Epoch...`** jumps to an epoch or navigation record.
+* Only the visible part of the editor is decorated and hovers are computed on demand, so large files stay responsive.
+
+## Supported Formats
+
+| Type | Versions | File names |
+| --- | --- | --- |
+| Observation | 2.10, 2.11, 3.0x, 4.0x | `*.YYo`, `*.obs`, `*.rxo`, `*.rnx` |
+| Navigation | 2.xx, 3.0x, 4.0x | `*.YYn`, `*.YYg`, `*.YYh`, `*.YYl`, `*.YYp`, `*.YYq`, `*.nav`, `*.rnx` |
+
+Files with other names are recognized when their first line contains `RINEX VERSION / TYPE`.
+Compressed files (Hatanaka `.crx`/`.YYd`, `.gz`) must be decompressed first.
+
+Note: VS Code does not synchronize files larger than 50 MB with extensions, so decorations, hovers and the outline
+are not available for them.
+
+## Settings
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| `rinexViewer.decorations.enabled` | `true` | Underline values and highlight epoch / record lines |
+| `rinexViewer.statusBar.enabled` | `true` | Show the file summary in the status bar |
+
+Colors can be customized with `workbench.colorCustomizations`
+(`rinexViewer.band1` ... `rinexViewer.band9`, `rinexViewer.alternateRecordBackground`, `rinexViewer.eventForeground`).
+
+## Development
+
+```sh
+npm install
+npm test                  # parser unit tests (node:test)
+npm run test:integration  # extension tests in VS Code
+```
 
 ## License
 
