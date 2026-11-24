@@ -1,7 +1,7 @@
 {
   "name": "rinex-viewer",
   "displayName": "rinex-viewer",
-  "description": "Enhance the readability of Receiver INdependent EXchange (RINEX) files",
+  "description": "Enhance the readability of Receiver INdependent EXchange (RINEX) observation and navigation files",
   "repository": {
     "type": "git",
     "url": "https://github.com/HatoGnss/rinex-viewer.git"
@@ -14,9 +14,6 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onLanguage:rinex"
-  ],
   "main": "./dist/extension.js",
   "contributes": {
     "languages": [
@@ -26,48 +23,180 @@
           "RINEX"
         ],
         "extensions": [
-          ".00o",
-          ".01o",
-          ".02o",
-          ".03o",
-          ".04o",
-          ".05o",
-          ".06o",
-          ".07o",
-          ".08o",
-          ".09o",
-          ".10o",
-          ".11o",
-          ".12o",
-          ".13o",
-          ".14o",
-          ".15o",
-          ".16o",
-          ".17o",
-          ".18o",
-          ".19o",
-          ".20o",
-          ".21o",
-          ".22o",
-          ".23o",
-          ".24o",
-          ".25o",
-          ".26o",
-          ".27o",
-          ".28o",
-          ".29o",
-          ".30o",
           ".obs",
-          ".rxo"
-        ]
+          ".rxo",
+          ".nav",
+          ".rnx"
+        ],
+        "filenamePatterns": [
+          "*.[0-9][0-9][oOnNgGhHlLpPqQ]"
+        ],
+        "firstLine": "^.{60}RINEX VERSION / TYPE"
       }
     ],
-    "colorizers": [
+    "grammars": [
       {
-        "id": "my-colorizer",
-        "name": "My Colorizer"
+        "language": "rinex",
+        "scopeName": "source.rinex",
+        "path": "./syntaxes/rinex.tmLanguage.json"
       }
-    ]
+    ],
+    "colors": [
+      {
+        "id": "rinexViewer.band1",
+        "description": "Underline color of band 1 observations (L1/G1/E1/B1C)",
+        "defaults": {
+          "dark": "#4FC1FF",
+          "light": "#0066B8",
+          "highContrast": "#4FC1FF",
+          "highContrastLight": "#0066B8"
+        }
+      },
+      {
+        "id": "rinexViewer.band2",
+        "description": "Underline color of band 2 observations (L2/G2/B1I)",
+        "defaults": {
+          "dark": "#C586C0",
+          "light": "#A31CA8",
+          "highContrast": "#C586C0",
+          "highContrastLight": "#A31CA8"
+        }
+      },
+      {
+        "id": "rinexViewer.band3",
+        "description": "Underline color of band 3 observations (G3)",
+        "defaults": {
+          "dark": "#9CDCFE",
+          "light": "#2B6CB0",
+          "highContrast": "#9CDCFE",
+          "highContrastLight": "#2B6CB0"
+        }
+      },
+      {
+        "id": "rinexViewer.band4",
+        "description": "Underline color of band 4 observations (G1a)",
+        "defaults": {
+          "dark": "#D7BA7D",
+          "light": "#8A6100",
+          "highContrast": "#D7BA7D",
+          "highContrastLight": "#8A6100"
+        }
+      },
+      {
+        "id": "rinexViewer.band5",
+        "description": "Underline color of band 5 observations (L5/E5a/B2a)",
+        "defaults": {
+          "dark": "#4EC9B0",
+          "light": "#007A63",
+          "highContrast": "#4EC9B0",
+          "highContrastLight": "#007A63"
+        }
+      },
+      {
+        "id": "rinexViewer.band6",
+        "description": "Underline color of band 6 observations (E6/B3/L6/G2a)",
+        "defaults": {
+          "dark": "#DCDCAA",
+          "light": "#7A6A00",
+          "highContrast": "#DCDCAA",
+          "highContrastLight": "#7A6A00"
+        }
+      },
+      {
+        "id": "rinexViewer.band7",
+        "description": "Underline color of band 7 observations (E5b/B2b)",
+        "defaults": {
+          "dark": "#F48771",
+          "light": "#C4380E",
+          "highContrast": "#F48771",
+          "highContrastLight": "#C4380E"
+        }
+      },
+      {
+        "id": "rinexViewer.band8",
+        "description": "Underline color of band 8 observations (E5(a+b)/B2(a+b))",
+        "defaults": {
+          "dark": "#B5CEA8",
+          "light": "#3B7A1E",
+          "highContrast": "#B5CEA8",
+          "highContrastLight": "#3B7A1E"
+        }
+      },
+      {
+        "id": "rinexViewer.band9",
+        "description": "Underline color of band 9 observations (S band)",
+        "defaults": {
+          "dark": "#CE9178",
+          "light": "#A3551F",
+          "highContrast": "#CE9178",
+          "highContrastLight": "#A3551F"
+        }
+      },
+      {
+        "id": "rinexViewer.alternateRecordBackground",
+        "description": "Background of every other navigation record",
+        "defaults": {
+          "dark": "#ffffff0a",
+          "light": "#0000000a",
+          "highContrast": null,
+          "highContrastLight": null
+        }
+      },
+      {
+        "id": "rinexViewer.eventForeground",
+        "description": "Foreground of special event records (epoch flag 2-5)",
+        "defaults": {
+          "dark": "#9d9d9d",
+          "light": "#6e6e6e",
+          "highContrast": "#ffffff",
+          "highContrastLight": "#000000"
+        }
+      }
+    ],
+    "configuration": {
+      "title": "RINEX Viewer",
+      "properties": {
+        "rinexViewer.decorations.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Underline observation values by band and type, and highlight epoch / record lines."
+        },
+        "rinexViewer.statusBar.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a summary of the active RINEX file in the status bar."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "rinexViewer.showSummary",
+        "title": "Show File Summary",
+        "category": "RINEX"
+      },
+      {
+        "command": "rinexViewer.goToEpoch",
+        "title": "Go to Epoch...",
+        "category": "RINEX"
+      },
+      {
+        "command": "rinexViewer.toggleDecorations",
+        "title": "Toggle Decorations",
+        "category": "RINEX"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "rinexViewer.showSummary",
+          "when": "editorLangId == rinex"
+        },
+        {
+          "command": "rinexViewer.goToEpoch",
+          "when": "editorLangId == rinex"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -76,9 +205,10 @@
     "package": "webpack --mode production --devtool hidden-source-map",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./src/test/extension.test.js"
+    "test": "npm run compile-tests && node --test out/test/unit/*.test.js",
+    "pretest:integration": "npm run compile-tests && npm run compile",
+    "test:integration": "vscode-test"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.6",
@@ -86,16 +216,20 @@
     "@types/vscode": "^1.86.0",
     "@typescript-eslint/eslint-plugin": "^6.19.1",
     "@typescript-eslint/parser": "^6.19.1",
-    "@vscode/test-cli": "^0.0.4",
-    "@vscode/test-electron": "^2.3.9",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^2.24.0",
     "eslint": "^8.56.0",
     "ts-loader": "^9.5.1",
     "typescript": "^5.3.3",
-    "vsce": "^2.15.0",
     "webpack": "^5.90.0",
-    "webpack-cli": "^5.1.4",
-    "vscode": "^1.1.37"
+    "webpack-cli": "^5.1.4"
   },
-  "dependencies": {
-  }
+  "keywords": [
+    "RINEX",
+    "GNSS",
+    "GPS",
+    "navigation",
+    "observation"
+  ]
 }

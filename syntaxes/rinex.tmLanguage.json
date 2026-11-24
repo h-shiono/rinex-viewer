@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "RINEX",
+  "scopeName": "source.rinex",
+  "patterns": [
+    { "include": "#header" },
+    { "include": "#comment" },
+    { "include": "#record" }
+  ],
+  "repository": {
+    "header": {
+      "begin": "^(?=.{60}RINEX VERSION / TYPE)",
+      "end": "^(.{60})(END OF HEADER)\\s*$",
+      "endCaptures": { "2": { "name": "keyword.control.rinex" } },
+      "patterns": [
+        { "include": "#comment" },
+        {
+          "match": "^(.{60})(.+?)\\s*$",
+          "captures": { "2": { "name": "entity.name.tag.rinex" } }
+        }
+      ]
+    },
+    "comment": {
+      "match": "^.{60}COMMENT\\s*$",
+      "name": "comment.line.rinex"
+    },
+    "record": {
+      "match": "^>.*$",
+      "name": "markup.heading.rinex"
+    }
+  }
+}
