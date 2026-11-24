@@ -14,9 +14,6 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onLanguage:rinex"
-  ],
   "main": "./dist/extension.js",
   "contributes": {
     "languages": [
@@ -26,40 +23,21 @@
           "RINEX"
         ],
         "extensions": [
-          ".00o",
-          ".01o",
-          ".02o",
-          ".03o",
-          ".04o",
-          ".05o",
-          ".06o",
-          ".07o",
-          ".08o",
-          ".09o",
-          ".10o",
-          ".11o",
-          ".12o",
-          ".13o",
-          ".14o",
-          ".15o",
-          ".16o",
-          ".17o",
-          ".18o",
-          ".19o",
-          ".20o",
-          ".21o",
-          ".22o",
-          ".23o",
-          ".24o",
-          ".25o",
-          ".26o",
-          ".27o",
-          ".28o",
-          ".29o",
-          ".30o",
           ".obs",
-          ".rxo"
-        ]
+          ".rxo",
+          ".rnx"
+        ],
+        "filenamePatterns": [
+          "*.[0-9][0-9][oO]"
+        ],
+        "firstLine": "^.{60}RINEX VERSION / TYPE"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "rinex",
+        "scopeName": "source.rinex",
+        "path": "./syntaxes/rinex.tmLanguage.json"
       }
     ],
     "colors": [
@@ -171,16 +149,43 @@
           "type": "boolean",
           "default": true,
           "description": "Underline observation values by band and type, and highlight epoch / record lines."
+        },
+        "rinexViewer.statusBar.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a summary of the active RINEX file in the status bar."
         }
       }
     },
     "commands": [
       {
+        "command": "rinexViewer.showSummary",
+        "title": "Show File Summary",
+        "category": "RINEX"
+      },
+      {
+        "command": "rinexViewer.goToEpoch",
+        "title": "Go to Epoch...",
+        "category": "RINEX"
+      },
+      {
         "command": "rinexViewer.toggleDecorations",
         "title": "Toggle Decorations",
         "category": "RINEX"
       }
-    ]
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "rinexViewer.showSummary",
+          "when": "editorLangId == rinex"
+        },
+        {
+          "command": "rinexViewer.goToEpoch",
+          "when": "editorLangId == rinex"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

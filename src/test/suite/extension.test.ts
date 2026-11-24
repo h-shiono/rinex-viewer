@@ -5,8 +5,7 @@ import * as vscode from 'vscode';
 const FIXTURES = path.resolve(__dirname, '../../../test/fixtures');
 
 async function open(name: string): Promise<vscode.TextDocument> {
-    let doc = await vscode.workspace.openTextDocument(path.join(FIXTURES, name));
-    doc = await vscode.languages.setTextDocumentLanguage(doc, 'rinex');
+    const doc = await vscode.workspace.openTextDocument(path.join(FIXTURES, name));
     await vscode.window.showTextDocument(doc);
     return doc;
 }
@@ -31,6 +30,13 @@ suite('Extension Test Suite', () => {
         assert.ok(extension.isActive);
     });
 
+    test('RINEX files are detected by name pattern and extension', async () => {
+        for (const name of ['v211_edge.99o', 'v210_gps.05o', 'v302_mixed_crlf.obs']) {
+            const doc = await open(name);
+            assert.equal(doc.languageId, 'rinex', name);
+        }
+    });
+
     test('Observation hover is computed on demand', async () => {
         const doc = await open('v211_edge.99o');
         // first value of the first satellite: L1 of G01 at 1998-12-31 23:59:59.5
@@ -38,5 +44,14 @@ suite('Extension Test Suite', () => {
         assert.match(text, /1998-12-31 23:59:59\.500/);
         assert.match(text, /G01/);
         assert.match(text, /L1/);
+    });
+
+    test('Outline lists header and epoch groups', async () => {
+        const doc = await open('v210_gps.05o');
+        const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
+            'vscode.executeDocumentSymbolProvider', doc.uri);
+        assert.equal(symbols[0].name, 'Header');
+        assert.equal(symbols[1].name, '2005-04-02 00:00');
+        assert.equal(symbols[1].children.length, 3);
     });
 });
