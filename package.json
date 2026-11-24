@@ -4,7 +4,7 @@
   "description": "Enhance the readability of Receiver INdependent EXchange (RINEX) observation and navigation files",
   "repository": {
     "type": "git",
-    "url": "https://github.com/HatoGnss/rinex-viewer.git"
+    "url": "https://github.com/h-shiono/rinex-viewer.git"
   },
   "version": "1.0.0",
   "engines": {

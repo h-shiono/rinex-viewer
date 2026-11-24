@@ -5,7 +5,7 @@ const sysName = (sys: string) => SYSTEM_NAMES[sys] ?? sys;
 
 /** Short label for the status bar. */
 export function statusText(model: RinexModel): string {
-    const v = model.header.version.toFixed(2).replace(/0$/, '');
+    const v = model.header.version.toFixed(2);
     if (model.kind === 'obs') {
         return `RINEX ${v} OBS · ${model.obs.epochs.length} epochs`;
     }
@@ -23,7 +23,7 @@ export function summaryMarkdown(model: RinexModel, title?: string): string {
         out.push(`# ${title}`, '');
     }
     out.push('| Item | Value |', '| --- | --- |');
-    out.push(`| RINEX version | ${code(h.version)} |`);
+    out.push(`| RINEX version | ${code(h.version.toFixed(2))} |`);
     out.push(`| File type | ${code(h.typeChar)}${h.systemChar.trim() ? ' / ' + code(h.systemChar) : ''} |`);
 
     if (model.kind === 'obs') {
