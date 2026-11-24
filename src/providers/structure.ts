@@ -12,7 +12,7 @@ function headerSymbol(model: RinexModel, doc: vscode.TextDocument): vscode.Docum
         return undefined;
     }
     const range = lineSpan(doc, 0, model.header.endLine);
-    return new vscode.DocumentSymbol('Header', `RINEX ${model.header.version}`, vscode.SymbolKind.Namespace, range,
+    return new vscode.DocumentSymbol('Header', `RINEX ${model.header.version.toFixed(2)}`, vscode.SymbolKind.Namespace, range,
         lineSpan(doc, 0, 0));
 }
 

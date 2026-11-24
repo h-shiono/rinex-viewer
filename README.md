@@ -12,7 +12,10 @@
 * Hover over a value to see the epoch, satellite, observation type, value, LLI and SSI.
 * Hover over header labels and observation type codes for a short description.
 
-<img src="images/v2.11.png" alt="Header and body" height="200">
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="images/observation-light.png">
+  <img src="images/observation-dark.png" alt="RINEX 3 observation file with band-colored underlines and a value hover">
+</picture>
 
 ### Navigation files
 
@@ -20,6 +23,11 @@
   for GPS, GLONASS, Galileo, BeiDou, QZSS, NavIC/IRNSS and SBAS.
 * RINEX 4 `EPH` (LNAV, CNAV, CNV2, INAV, FNAV, D1/D2, CNV1-3, FDMA, SBAS), `STO`, `EOP` and `ION` records are supported.
 * The first line of each record is shown in bold and every other record is shaded.
+
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="images/navigation-light.png">
+  <img src="images/navigation-dark.png" alt="RINEX 4 navigation file with a field hover">
+</picture>
 
 ### Common
 
@@ -29,6 +37,11 @@
   (time span, interval, satellites, observation types, record counts).
 * **`RINEX: Go to Epoch...`** jumps to an epoch or navigation record.
 * Only the visible part of the editor is decorated and hovers are computed on demand, so large files stay responsive.
+
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="images/outline-light.png">
+  <img src="images/outline-dark.png" alt="Outline, breadcrumbs and status bar summary of a RINEX 2 observation file">
+</picture>
 
 ## Supported Formats
 
