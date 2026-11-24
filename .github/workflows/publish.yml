@@ -32,6 +32,8 @@ jobs:
 
       - run: npm run lint
       - run: npm test
+      - name: Integration tests
+        run: xvfb-run -a npm run test:integration
 
       - name: Package
         run: npx vsce package --out "rinex-viewer-${GITHUB_REF_NAME}.vsix"

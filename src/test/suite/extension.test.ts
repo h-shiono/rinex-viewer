@@ -23,6 +23,20 @@ suite('Extension Test Suite', () => {
         assert.ok(vscode.extensions.getExtension(id));
     });
 
+    // Must run before anything calls activate(): opening a RINEX file alone has to
+    // activate the extension (regression: missing onLanguage activation event).
+    test('Opening a RINEX file activates the extension', async function () {
+        this.timeout(30 * 1000);
+        const extension = vscode.extensions.getExtension(id)!;
+        assert.ok(!extension.isActive, 'extension was already active before any RINEX file was opened');
+        const doc = await open('v302_mixed_crlf.obs');
+        for (let i = 0; i < 100 && !extension.isActive; i++) {
+            await new Promise((r) => setTimeout(r, 100));
+        }
+        assert.ok(extension.isActive, 'extension did not activate on a RINEX file');
+        assert.match(await hoverText(doc, 44, 24), /G12/);
+    });
+
     test('Extension should be able to activate', async function () {
         this.timeout(60 * 1000);
         const extension = vscode.extensions.getExtension(id)!;

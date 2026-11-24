@@ -6,6 +6,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-11-24
+
+### Fixed
+- The extension was not activated when a RINEX file was opened, so no decorations or hovers were shown
+  until a RINEX command was run.
+
 ## [1.1.0] - 2026-11-24
 
 ### Added

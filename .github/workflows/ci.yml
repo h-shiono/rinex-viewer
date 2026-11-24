@@ -20,6 +20,8 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+      - name: Integration tests
+        run: xvfb-run -a npm run test:integration
       - name: Package
         run: npx vsce package --out rinex-viewer.vsix
       - uses: actions/upload-artifact@v4
