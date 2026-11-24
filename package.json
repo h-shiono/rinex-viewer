@@ -1,7 +1,7 @@
 {
   "name": "rinex-viewer",
   "displayName": "rinex-viewer",
-  "description": "Enhance the readability of Receiver INdependent EXchange (RINEX) files",
+  "description": "Enhance the readability of Receiver INdependent EXchange (RINEX) observation and navigation files",
   "repository": {
     "type": "git",
     "url": "https://github.com/HatoGnss/rinex-viewer.git"
@@ -25,10 +25,11 @@
         "extensions": [
           ".obs",
           ".rxo",
+          ".nav",
           ".rnx"
         ],
         "filenamePatterns": [
-          "*.[0-9][0-9][oO]"
+          "*.[0-9][0-9][oOnNgGhHlLpPqQ]"
         ],
         "firstLine": "^.{60}RINEX VERSION / TYPE"
       }
@@ -132,6 +133,16 @@
         }
       },
       {
+        "id": "rinexViewer.alternateRecordBackground",
+        "description": "Background of every other navigation record",
+        "defaults": {
+          "dark": "#ffffff0a",
+          "light": "#0000000a",
+          "highContrast": null,
+          "highContrastLight": null
+        }
+      },
+      {
         "id": "rinexViewer.eventForeground",
         "description": "Foreground of special event records (epoch flag 2-5)",
         "defaults": {
@@ -213,5 +224,12 @@
     "typescript": "^5.3.3",
     "webpack": "^5.90.0",
     "webpack-cli": "^5.1.4"
-  }
+  },
+  "keywords": [
+    "RINEX",
+    "GNSS",
+    "GPS",
+    "navigation",
+    "observation"
+  ]
 }

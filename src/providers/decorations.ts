@@ -28,6 +28,8 @@ export class DecorationController implements vscode.Disposable {
     private readonly obsTypes = new Map<string, vscode.TextEditorDecorationType>();
     private readonly epochHeader: vscode.TextEditorDecorationType;
     private readonly event: vscode.TextEditorDecorationType;
+    private readonly recordStart: vscode.TextEditorDecorationType;
+    private readonly alternate: vscode.TextEditorDecorationType;
     private readonly all: vscode.TextEditorDecorationType[] = [];
 
     private readonly windows = new WeakMap<vscode.TextEditor, Window>();
@@ -46,7 +48,12 @@ export class DecorationController implements vscode.Disposable {
             }
         }
         this.epochHeader = this.create({ fontWeight: 'bold' });
+        this.recordStart = this.create({ fontWeight: 'bold' });
         this.event = this.create({ fontStyle: 'italic', color: new vscode.ThemeColor('rinexViewer.eventForeground') });
+        this.alternate = this.create({
+            isWholeLine: true,
+            backgroundColor: new vscode.ThemeColor('rinexViewer.alternateRecordBackground'),
+        });
 
         this.disposables.push(
             vscode.window.onDidChangeVisibleTextEditors((editors) => editors.forEach((e) => this.schedule(e, 0))),
@@ -195,6 +202,19 @@ export class DecorationController implements vscode.Disposable {
                 const ev = events[k];
                 for (let l = Math.max(ev.line, start); l <= Math.min(ev.endLine, end); l++) {
                     push(this.event, lineRange(l));
+                }
+            }
+        } else if (model.kind === 'nav') {
+            const { records } = model.nav;
+            for (let k = lowerBound(records, start); k < records.length && records[k].line <= end; k++) {
+                const rec = records[k];
+                for (let l = rec.line; l <= rec.dataLine; l++) {
+                    if (l >= start && l <= end) {
+                        push(this.recordStart, lineRange(l));
+                    }
+                }
+                if (k % 2 === 1) {
+                    push(this.alternate, new vscode.Range(Math.max(rec.line, start), 0, Math.min(rec.endLine, end), 0));
                 }
             }
         }

@@ -3,7 +3,8 @@ import * as assert from 'node:assert/strict';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {
-    RinexModel, cellsOnLine, findByLine, formatEpoch, fromString, parseEpoch, parseRinex, summarizeObs,
+    RinexModel, cellsOnLine, findByLine, formatEpoch, fromString, navCellsOnLine, parseEpoch, parseRinex,
+    summarizeNav, summarizeObs,
 } from '../../parser';
 
 const FIXTURES = path.resolve(__dirname, '../../../test/fixtures');
@@ -16,6 +17,11 @@ function load(name: string) {
 function asObs(m: RinexModel) {
     assert.equal(m.kind, 'obs');
     return (m as Extract<RinexModel, { kind: 'obs' }>).obs;
+}
+
+function asNav(m: RinexModel) {
+    assert.equal(m.kind, 'nav');
+    return (m as Extract<RinexModel, { kind: 'nav' }>).nav;
 }
 
 test('epoch formatting keeps sub-second precision and handles 2-digit years', () => {
@@ -96,4 +102,76 @@ test('RINEX 3.02 observation with CRLF (MALIB sample)', () => {
     assert.equal(cells[0].sat, ep.sats[0]);
     assert.equal(findByLine(obs.epochs, line), ep);
     assert.equal(findByLine(obs.epochs, ep.endLine + 1), obs.epochs[1]);
+});
+
+test('RINEX 2 GPS navigation', () => {
+    const { src, model } = load('v2_gps.10n');
+    const nav = asNav(model);
+    assert.equal(nav.records.length, 3);
+    const rec = nav.records[0];
+    assert.equal(rec.sat, 'G01');
+    assert.equal(rec.endLine - rec.dataLine, 7);
+    assert.equal(formatEpoch(rec.time), '2010-07-02 00:00:00.000');
+    const row0 = navCellsOnLine(src, nav, rec, rec.dataLine);
+    assert.equal(row0[0].field?.[0], 'SV clock bias af0');
+    assert.ok(Math.abs(row0[0].value - -0.13663712889e-3) < 1e-15);
+    const row2 = navCellsOnLine(src, nav, rec, rec.dataLine + 2);
+    assert.equal(row2[3].field?.[0], '√A');
+    assert.ok(Math.abs(row2[3].value - 5154.79979706) < 1e-6);
+});
+
+test('RINEX 2 GLONASS navigation', () => {
+    const nav = asNav(load('v201_glo.09g').model);
+    assert.equal(nav.records.length, 2);
+    assert.equal(nav.records[0].sat, 'R02');
+    assert.equal(nav.records[0].msg, 'FDMA');
+    assert.equal(nav.records[0].endLine - nav.records[0].dataLine, 3);
+});
+
+test('RINEX 3.02 navigation with blank-padded satellite ids', () => {
+    const { src, model } = load('v302_mixed.nav');
+    const nav = asNav(model);
+    assert.deepEqual(nav.records.map((r) => r.sat), ['J07', 'J04', 'G11', 'J03', 'G15', 'G06']);
+    const rec = nav.records[0];
+    assert.equal(rec.endLine - rec.dataLine, 7);
+    const row1 = navCellsOnLine(src, nav, rec, rec.dataLine + 1);
+    assert.equal(row1[0].field?.[0], 'IODE');
+    assert.equal(row1[0].value, 125);
+});
+
+test('RINEX 4.02 navigation: every record type has the expected line count', () => {
+    const { src, model } = load('v402_mixed.rnx');
+    const nav = asNav(model);
+    // lines after the "> ..." line, verified against the DLR BRD400 file
+    const expected: Record<string, number> = {
+        'EPH G LNAV': 8, 'EPH G CNAV': 9, 'EPH J LNAV': 8, 'EPH J CNAV': 9, 'EPH J CNV2': 10,
+        'EPH E INAV': 8, 'EPH E FNAV': 8, 'EPH C D1': 8, 'EPH C D2': 8, 'EPH C CNV1': 10,
+        'EPH C CNV2': 10, 'EPH C CNV3': 9, 'EPH I LNAV': 8, 'EPH R FDMA': 5, 'EPH S SBAS': 4,
+        'STO G LNAV': 2, 'EOP G CNVX': 3, 'ION G LNAV': 3, 'ION E IFNV': 2, 'ION C CNVX': 3,
+    };
+    const seen = new Map(nav.records.map((r) => [`${r.kind} ${r.sys} ${r.msg}`, r]));
+    for (const [key, lines] of Object.entries(expected)) {
+        const r = seen.get(key);
+        assert.ok(r, `missing ${key}`);
+        assert.equal(r.endLine - r.line, lines, key);
+        // every field of every row must have a definition or be an explicit spare
+        for (let l = r.dataLine; l <= r.endLine; l++) {
+            for (const c of navCellsOnLine(src, nav, r, l)) {
+                assert.ok(Number.isFinite(c.value) || (r.kind === 'STO' && c.row === 0), `${key} ${c.raw}`);
+            }
+        }
+    }
+    const glo = seen.get('EPH R FDMA')!;
+    assert.equal(navCellsOnLine(src, nav, glo, glo.dataLine + 4)[2].field?.[0], 'URAI (F_T)');
+    const sto = seen.get('STO G LNAV')!;
+    assert.equal(navCellsOnLine(src, nav, sto, sto.dataLine)[0].raw.length, 4);
+    const cnv2 = seen.get('EPH J CNV2')!;
+    assert.equal(navCellsOnLine(src, nav, cnv2, cnv2.dataLine + 9)[0].field?.[0], 'Transmission time t_tm');
+
+    assert.equal(seen.get('STO R FDMA')?.sat, 'R'); // satellite number left blank
+    assert.equal(seen.get('ION J LNAV WIDE')?.sys, 'J');
+
+    const s = summarizeNav(nav);
+    assert.equal(s.messages.get('EPH G LNAV'), 1);
+    assert.ok(s.ephemerisCount >= 15);
 });

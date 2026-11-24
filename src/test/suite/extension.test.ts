@@ -31,7 +31,7 @@ suite('Extension Test Suite', () => {
     });
 
     test('RINEX files are detected by name pattern and extension', async () => {
-        for (const name of ['v211_edge.99o', 'v210_gps.05o', 'v302_mixed_crlf.obs']) {
+        for (const name of ['v211_edge.99o', 'v2_gps.10n', 'v201_glo.09g', 'v302_mixed.nav', 'v402_mixed.rnx', 'v302_mixed_crlf.obs']) {
             const doc = await open(name);
             assert.equal(doc.languageId, 'rinex', name);
         }
@@ -44,6 +44,13 @@ suite('Extension Test Suite', () => {
         assert.match(text, /1998-12-31 23:59:59\.500/);
         assert.match(text, /G01/);
         assert.match(text, /L1/);
+    });
+
+    test('Navigation hover shows the field name', async () => {
+        const doc = await open('v2_gps.10n');
+        const line = doc.getText().split(/\r?\n/).findIndex((l) => l.includes('END OF HEADER')) + 3;
+        const text = await hoverText(doc, line, 70); // 4th field of BROADCAST ORBIT 2
+        assert.match(text, /√A/);
     });
 
     test('Outline lists header and epoch groups', async () => {

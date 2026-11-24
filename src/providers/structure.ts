@@ -16,7 +16,7 @@ function headerSymbol(model: RinexModel, doc: vscode.TextDocument): vscode.Docum
         lineSpan(doc, 0, 0));
 }
 
-/** Outline: header, then epochs grouped per hour. */
+/** Outline: header, then epochs grouped per hour (obs) or records grouped per system/kind (nav). */
 export class RinexSymbolProvider implements vscode.DocumentSymbolProvider {
     constructor(private readonly cache: ModelCache) {}
 
@@ -61,12 +61,30 @@ export class RinexSymbolProvider implements vscode.DocumentSymbolProvider {
             }
             result.filter((g) => g.kind === vscode.SymbolKind.Module)
                 .forEach((g) => (g.detail = `${g.children.length} epochs`));
+        } else if (model.kind === 'nav') {
+            const groups = new Map<string, vscode.DocumentSymbol>();
+            for (const rec of model.nav.records) {
+                const key = rec.kind === 'EPH' ? rec.sys : rec.kind;
+                const sym = new vscode.DocumentSymbol(`${rec.sat} ${formatEpoch(rec.time)}`, `${rec.kind} ${rec.msg}`,
+                    rec.kind === 'EPH' ? vscode.SymbolKind.Object : vscode.SymbolKind.Constant,
+                    lineSpan(doc, rec.line, rec.endLine), lineSpan(doc, rec.line, rec.line));
+                let g = groups.get(key);
+                if (!g) {
+                    const name = rec.kind === 'EPH' ? SYSTEM_NAMES[rec.sys] ?? rec.sys : rec.kind;
+                    g = new vscode.DocumentSymbol(name, '', vscode.SymbolKind.Module, sym.range, sym.selectionRange);
+                    groups.set(key, g);
+                    result.push(g);
+                }
+                g.children.push(sym);
+                g.range = g.range.union(sym.range);
+            }
+            groups.forEach((g) => (g.detail = `${g.children.length} records`));
         }
         return result;
     }
 }
 
-/** Folding: header, each epoch / event. */
+/** Folding: header, each epoch / event, each navigation record. */
 export class RinexFoldingProvider implements vscode.FoldingRangeProvider {
     constructor(private readonly cache: ModelCache) {}
 
@@ -86,6 +104,8 @@ export class RinexFoldingProvider implements vscode.FoldingRangeProvider {
         if (model.kind === 'obs') {
             add(model.obs.epochs);
             add(model.obs.events);
+        } else if (model.kind === 'nav') {
+            add(model.nav.records);
         }
         return out;
     }
@@ -105,6 +125,12 @@ export async function goToEpoch(cache: ModelCache) {
             label: formatEpoch(e.time),
             description: `${e.sats.length} sats${e.flag ? ' · flag ' + e.flag : ''}`,
             line: e.line,
+        }));
+    } else if (model.kind === 'nav') {
+        items = model.nav.records.map((r) => ({
+            label: `${r.sat} ${formatEpoch(r.time)}`,
+            description: `${r.kind} ${r.msg}`,
+            line: r.line,
         }));
     }
     if (items.length === 0) {

@@ -1,4 +1,4 @@
-import { RinexModel, SYSTEM_NAMES, formatEpoch, summarizeObs } from '../parser';
+import { RinexModel, SYSTEM_NAMES, formatEpoch, summarizeNav, summarizeObs } from '../parser';
 
 const code = (s: string | number) => '`' + String(s).replace(/`/g, '') + '`';
 const sysName = (sys: string) => SYSTEM_NAMES[sys] ?? sys;
@@ -8,6 +8,9 @@ export function statusText(model: RinexModel): string {
     const v = model.header.version.toFixed(2).replace(/0$/, '');
     if (model.kind === 'obs') {
         return `RINEX ${v} OBS · ${model.obs.epochs.length} epochs`;
+    }
+    if (model.kind === 'nav') {
+        return `RINEX ${v} NAV · ${model.nav.records.length} records`;
     }
     return `RINEX ${v}`;
 }
@@ -41,6 +44,19 @@ export function summaryMarkdown(model: RinexModel, title?: string): string {
             if (types.length) {
                 out.push(`| ${sysName(sys)} obs types | ${types.map(code).join(' ')} |`);
             }
+        }
+    } else if (model.kind === 'nav') {
+        const s = summarizeNav(model.nav);
+        out.push(`| First ephemeris | ${code(formatEpoch(s.start))} |`);
+        out.push(`| Last ephemeris | ${code(formatEpoch(s.end))} |`);
+        out.push(`| Ephemerides | ${code(s.ephemerisCount)} |`);
+        for (const [sys, sats] of s.satellites) {
+            const list = [...sats].map(([sat, n]) => `${code(sat)}×${n}`).join(' ');
+            out.push(`| ${sysName(sys)} (${sats.size}) | ${list} |`);
+        }
+        out.push('', '| Record | Count |', '| --- | --- |');
+        for (const [key, n] of s.messages) {
+            out.push(`| ${code(key)} | ${n} |`);
         }
     }
     return out.join('\n');

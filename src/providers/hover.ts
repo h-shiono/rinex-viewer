@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import {
     EPOCH_FLAGS, HEADER_LABELS, RinexModel, SYSTEM_NAMES,
-    cellsOnLine, describeLli, describeObsCode, describeSsi, findByLine, formatEpoch, headerLabel,
+    cellsOnLine, describeLli, describeObsCode, describeSsi, findByLine, formatEpoch, headerLabel, navCellsOnLine,
 } from '../parser';
 import { ModelCache, documentSource } from './model';
 
@@ -31,6 +31,9 @@ export class RinexHoverProvider implements vscode.HoverProvider {
         }
         if (model.kind === 'obs') {
             return this.obsHover(model, doc, pos);
+        }
+        if (model.kind === 'nav') {
+            return this.navHover(model, doc, pos);
         }
         return undefined;
     }
@@ -94,6 +97,35 @@ export class RinexHoverProvider implements vscode.HoverProvider {
             ['Value', Number.isFinite(cell.value) ? code(`${cell.value}${d.unit ? ' ' + d.unit : ''}`) : '(blank)'],
             ['LLI', cell.lli ? describeLli(cell.lli) : ''],
             ['SSI', cell.ssi ? describeSsi(cell.ssi) : ''],
+        ]), new vscode.Range(cell.line, cell.start, cell.line, cell.end));
+    }
+
+    private navHover(model: Extract<RinexModel, { kind: 'nav' }>, doc: vscode.TextDocument, pos: vscode.Position) {
+        const nav = model.nav;
+        const rec = findByLine(nav.records, pos.line);
+        if (!rec) {
+            return undefined;
+        }
+        const recordRows: [string, string][] = [
+            ['Record', `${code(rec.kind)} ${code(rec.sat)} ${code(rec.msg)}`],
+            ['System', SYSTEM_NAMES[rec.sys] ?? rec.sys],
+            ['Epoch', code(formatEpoch(rec.time))],
+        ];
+        const cells = navCellsOnLine(documentSource(doc), nav, rec, pos.line);
+        const cell = cells.find((c) => hit(pos, c.start, c.end));
+        if (!cell) {
+            return new vscode.Hover(table(recordRows));
+        }
+        const orbit = cell.row === 0 ? 'epoch line' : `line ${cell.row}`;
+        const name = cell.field ? cell.field[0] : `spare / undefined (${orbit}, field ${cell.col + 1})`;
+        const unit = cell.field?.[1];
+        const value = Number.isFinite(cell.value)
+            ? code(`${cell.value}${unit ? ' ' + unit : ''}`)
+            : code(cell.raw);
+        return new vscode.Hover(table([
+            ['Field', `**${name}**`],
+            ['Value', value],
+            ...recordRows,
         ]), new vscode.Range(cell.line, cell.start, cell.line, cell.end));
     }
 }
